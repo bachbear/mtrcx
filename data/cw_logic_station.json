@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "station_id": 10,
+    "line_id": 1,
+    "station_type": 1
+  },
+  {
+    "id": 2,
+    "station_id": 15,
+    "line_id": 1,
+    "station_type": 1
+  }
+]

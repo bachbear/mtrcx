@@ -1,0 +1,10 @@
+[
+  {
+    "seat_type_id": 1,
+    "seat_type_name": "驾驶位"
+  },
+  {
+    "seat_type_id": 2,
+    "seat_type_name": "便乘位"
+  }
+]
