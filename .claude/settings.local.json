@@ -39,7 +39,8 @@
       "WebFetch(domain:developers.cloudflare.com)",
       "WebSearch",
       "Bash(git checkout:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []
