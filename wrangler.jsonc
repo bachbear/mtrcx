@@ -1,0 +1,8 @@
+{
+  "name": "mtrcx-subway-system",
+  "compatibility_date": "2025-08-31",
+  "main": "src/index_with_files.js",
+  "routes": [
+    "mtr.xiaov.co/*"
+  ]
+}

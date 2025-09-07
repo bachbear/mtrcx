@@ -1,0 +1,82 @@
+export default [
+  {
+    "station_id": 1,
+    "station_name": "王府井站"
+  },
+  {
+    "station_id": 2,
+    "station_name": "西单站"
+  },
+  {
+    "station_id": 3,
+    "station_name": "东直门站"
+  },
+  {
+    "station_id": 4,
+    "station_name": "西直门站"
+  },
+  {
+    "station_id": 5,
+    "station_name": "建国门站"
+  },
+  {
+    "station_id": 6,
+    "station_name": "复兴门站"
+  },
+  {
+    "station_id": 7,
+    "station_name": "国贸站"
+  },
+  {
+    "station_id": 8,
+    "station_name": "海淀黄庄站"
+  },
+  {
+    "station_id": 9,
+    "station_name": "中关村站"
+  },
+  {
+    "station_id": 10,
+    "station_name": "五道口站"
+  },
+  {
+    "station_id": 11,
+    "station_name": "雍和宫站"
+  },
+  {
+    "station_id": 12,
+    "station_name": "安定门站"
+  },
+  {
+    "station_id": 13,
+    "station_name": "朝阳门站"
+  },
+  {
+    "station_id": 14,
+    "station_name": "崇文门站"
+  },
+  {
+    "station_id": 15,
+    "station_name": "宣武门站"
+  },
+  {
+    "station_id": 16,
+    "station_name": "菜市口站"
+  },
+  {
+    "station_id": 17,
+    "station_name": "陶然亭站"
+  },
+  {
+    "station_id": 18,
+    "station_name": "北京站"
+  },
+  {
+    "station_id": 19,
+    "station_name": "天安门东站"
+  },
+  {
+    "station_id": 20,
+    "station_name": "天安门西站"
+  }
+];

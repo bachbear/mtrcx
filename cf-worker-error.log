@@ -1,0 +1,61 @@
+2025-08-31T02:30:53.488Z	Initializing build environment...
+2025-08-31T02:31:01.743Z	Success: Finished initializing build environment
+2025-08-31T02:31:02.670Z	Cloning repository...
+2025-08-31T02:31:04.059Z	Restoring from dependencies cache
+2025-08-31T02:31:04.068Z	Restoring from build output cache
+2025-08-31T02:31:04.071Z	Detected the following tools from environment: npm@10.9.2, nodejs@22.16.0
+2025-08-31T02:31:04.538Z	Installing project dependencies: npm clean-install --progress=false
+2025-08-31T02:31:06.710Z	
+2025-08-31T02:31:06.710Z	added 99 packages, and audited 100 packages in 2s
+2025-08-31T02:31:06.710Z	
+2025-08-31T02:31:06.711Z	18 packages are looking for funding
+2025-08-31T02:31:06.711Z	  run `npm fund` for details
+2025-08-31T02:31:06.716Z	
+2025-08-31T02:31:06.716Z	3 high severity vulnerabilities
+2025-08-31T02:31:06.716Z	
+2025-08-31T02:31:06.716Z	To address all issues (including breaking changes), run:
+2025-08-31T02:31:06.716Z	  npm audit fix --force
+2025-08-31T02:31:06.716Z	
+2025-08-31T02:31:06.717Z	Run `npm audit` for details.
+2025-08-31T02:31:06.821Z	Executing user deploy command: npx wrangler deploy
+2025-08-31T02:31:08.809Z	npm warn exec The following package was not found and will be installed: wrangler@4.33.1
+2025-08-31T02:31:25.906Z	
+2025-08-31T02:31:25.906Z	⛅️ wrangler 4.33.1
+2025-08-31T02:31:25.906Z	───────────────────
+2025-08-31T02:31:25.912Z	
+2025-08-31T02:31:25.982Z	✘ [ERROR] Missing entry-point to Worker script or to assets directory
+2025-08-31T02:31:25.983Z	
+2025-08-31T02:31:25.983Z	  
+2025-08-31T02:31:25.983Z	  If there is code to deploy, you can either:
+2025-08-31T02:31:25.983Z	  - Specify an entry-point to your Worker script via the command line (ex: `npx wrangler deploy src/index.ts`)
+2025-08-31T02:31:25.984Z	  - Or create a "wrangler.jsonc" file containing:
+2025-08-31T02:31:25.984Z	  
+2025-08-31T02:31:25.986Z	  ```
+2025-08-31T02:31:25.987Z	  {
+2025-08-31T02:31:25.987Z	    "name": "worker-name",
+2025-08-31T02:31:25.987Z	    "compatibility_date": "2025-08-31",
+2025-08-31T02:31:25.987Z	    "main": "src/index.ts"
+2025-08-31T02:31:25.988Z	  }
+2025-08-31T02:31:25.988Z	  ```
+2025-08-31T02:31:25.988Z	  
+2025-08-31T02:31:25.988Z	  
+2025-08-31T02:31:25.989Z	  If are uploading a directory of assets, you can either:
+2025-08-31T02:31:25.990Z	  - Specify the path to the directory of assets via the command line: (ex: `npx wrangler deploy --assets=./dist`)
+2025-08-31T02:31:25.991Z	  - Or create a "wrangler.jsonc" file containing:
+2025-08-31T02:31:25.991Z	  
+2025-08-31T02:31:25.991Z	  ```
+2025-08-31T02:31:25.991Z	  {
+2025-08-31T02:31:25.991Z	    "name": "worker-name",
+2025-08-31T02:31:25.991Z	    "compatibility_date": "2025-08-31",
+2025-08-31T02:31:25.991Z	    "assets": {
+2025-08-31T02:31:25.991Z	      "directory": "./dist"
+2025-08-31T02:31:25.991Z	    }
+2025-08-31T02:31:25.991Z	  }
+2025-08-31T02:31:25.991Z	  ```
+2025-08-31T02:31:25.992Z	  
+2025-08-31T02:31:25.992Z	
+2025-08-31T02:31:25.992Z	
+2025-08-31T02:31:25.995Z	
+2025-08-31T02:31:25.995Z	Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+2025-08-31T02:31:26.018Z	🪵  Logs were written to "/opt/buildhome/.config/.wrangler/logs/wrangler-2025-08-31_02-31-21_927.log"
+2025-08-31T02:31:26.165Z	Failed: error occurred while running deploy command
