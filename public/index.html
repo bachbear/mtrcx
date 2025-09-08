@@ -92,15 +92,16 @@
         <h1>地铁交路管理系统</h1>
         
         <div class="tabs">
-            <div class="tab active" onclick="showTab('crossingRoads')">交路管理</div>
-            <div class="tab" onclick="showTab('lines')">线路管理</div>
-            <div class="tab" onclick="showTab('trainSchedules')">列车时刻表管理</div>
-            <div class="tab" onclick="showTab('driveTicketParams')">交路参数表</div>
+            <div class="tab active" onclick="showTab('crossingRoads', event)">交路管理</div>
+            <div class="tab" onclick="showTab('lines', event)">线路管理</div>
+            <div class="tab" onclick="showTab('trainSchedules', event)">列车时刻表管理</div>
+            <div class="tab" onclick="showTab('driveTicketParams', event)">交路参数表</div>
         </div>
         
         <div id="crossingRoads" class="tab-content active">
             <h2>交路信息</h2>
-            <button id="generateDriveTicketsBtn" onclick="generateDriveTickets()">更新交路票</button>
+            
+            <!-- 交路票数据表 -->
             <h3>交路票数据</h3>
             <table id="driveTicketsTable">
                 <thead>
@@ -120,28 +121,7 @@
                 </tbody>
             </table>
             
-            <div style="margin-top: 20px;">
-                <button id="generateDriveTicketCollectBtn" onclick="generateDriveTicketCollect()">更新票夹</button>
-            </div>
-            
-            <h3>交路票夹数据</h3>
-            <table id="driveTicketCollectTable">
-                <thead>
-                    <tr>
-                        <th>主键ID</th>
-                        <th>交路票夹序号</th>
-                        <th>交路票序号链</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- 数据将通过JavaScript动态加载 -->
-                </tbody>
-            </table>
-            
-            <div style="margin-top: 20px;">
-                <button id="generateRideTicketsBtn" onclick="generateRideTickets()">更新便乘票</button>
-            </div>
-            
+            <!-- 便乘票数据表 -->
             <h3>便乘票数据</h3>
             <table id="rideTicketsTable">
                 <thead>
@@ -159,6 +139,34 @@
                     <!-- 数据将通过JavaScript动态加载 -->
                 </tbody>
             </table>
+            
+            <!-- 交路票夹数据表 -->
+            <h3>交路票夹数据</h3>
+            <table id="driveTicketCollectTable">
+                <thead>
+                    <tr>
+                        <th>主键ID</th>
+                        <th>交路票夹序号</th>
+                        <th>交路票序号链</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+            
+            <!-- 底部按钮组框 -->
+            <div style="margin-top: 30px; padding: 20px; border: 2px solid #ccc; border-radius: 8px; background-color: #f9f9f9;">
+                <h4 style="margin-top: 0; margin-bottom: 15px; text-align: center;">操作按钮</h4>
+                <div style="display: flex; justify-content: center; gap: 20px;">
+                    <button id="generateDriveTicketsBtn" onclick="generateDriveTickets()" 
+                            style="padding: 10px 20px; font-size: 14px; cursor: pointer;">更新交路票</button>
+                    <button id="generateRideTicketsBtn" onclick="generateRideTickets()" 
+                            style="padding: 10px 20px; font-size: 14px; cursor: pointer;">更新便乘票</button>
+                    <button id="generateDriveTicketCollectBtn" onclick="generateDriveTicketCollect()" 
+                            style="padding: 10px 20px; font-size: 14px; cursor: pointer;">更新交路票夹</button>
+                </div>
+            </div>
         </div>
         
         <div id="lines" class="tab-content">
@@ -283,14 +291,14 @@
 
     <script>
         // API基础URL
-        const API_BASE_URL = 'http://localhost:3337';
+        const API_BASE_URL = 'http://localhost:3333';
         
         // 存储交路参数数据
         let crossingRoadsParamsData = [];
         let driveTicketParamsData = [];
 
         // 显示指定的标签页
-        function showTab(tabId) {
+        function showTab(tabId, event) {
             // 隐藏所有标签内容
             const tabContents = document.querySelectorAll('.tab-content');
             tabContents.forEach(content => content.classList.remove('active'));
@@ -303,50 +311,23 @@
             document.getElementById(tabId).classList.add('active');
             
             // 激活点击的标签
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             // 根据标签加载相应数据
             if (tabId === 'crossingRoads') {
-                loadCrossingRoads();
+                loadDriveTickets();
             } else if (tabId === 'lines') {
                 loadLines();
             } else if (tabId === 'trainSchedules') {
                 loadTrainSchedules();
-            } else if (tabId === 'crossingRoadParams') {
-                loadCrossingRoadsParams();
             } else if (tabId === 'driveTicketParams') {
                 loadDriveTicketParams();
             }
         }
         
-        // 加载交路票数据
-        function loadCrossingRoads() {
-            fetch(`${API_BASE_URL}/api/drive-tickets`)
-                .then(response => response.json())
-                .then(data => {
-                    const tbody = document.querySelector('#driveTicketsTable tbody');
-                    tbody.innerHTML = '';
-                    
-                    data.forEach(item => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${item.id}</td>
-                            <td>${item.ticket_id}</td>
-                            <td>${item.train_name || ''}</td>
-                            <td>${item.start_station || ''}</td>
-                            <td>${item.end_station || ''}</td>
-                            <td>${item.seat_type || ''}</td>
-                            <td>${item.is_sold ? '是' : '否'}</td>
-                            <td>${item.pickup_time || ''}</td>
-                            <td>${item.dropoff_time || ''}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error('加载交路票数据失败:', error);
-                });
-        }
+        // 该函数的重复定义已移除，功能已合并到第875行的定义中
         
         // 加载线路数据
         function loadLines() {
@@ -681,9 +662,47 @@
             });
         }
         
+        // 加载交路票数据
+        function loadDriveTickets() {
+            fetch(`${API_BASE_URL}/api/drive-tickets`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tbody = document.querySelector('#driveTicketsTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.ticket_id || ''}</td>
+                            <td>${item.train_name || ''}</td>
+                            <td>${item.start_station || ''}</td>
+                            <td>${item.end_station || ''}</td>
+                            <td>${item.is_sold ? '是' : '否'}</td>
+                            <td>${item.pickup_time || ''}</td>
+                            <td>${item.dropoff_time || ''}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('加载交路票数据失败:', error);
+                    // 显示错误信息到表格中
+                    const tbody = document.querySelector('#driveTicketsTable tbody');
+                    tbody.innerHTML = `<tr><td colspan="8">加载数据失败: ${error.message}</td></tr>`;
+                });
+        }
+
         // 页面加载时初始化数据
         document.addEventListener('DOMContentLoaded', function() {
-            loadCrossingRoads();
+            loadDriveTickets();
+            loadDriveTicketCollect();
+            loadRideTickets();
         });
 
         // 生成和更新交路票记录
@@ -702,7 +721,7 @@
                 if (data.message) {
                     alert(`交路票记录更新成功！共生成了 ${data.count || 0} 条记录`);
                     // 重新加载交路票数据
-                    loadCrossingRoads();
+                    loadDriveTickets();
                 } else {
                     alert('交路票记录更新失败：' + (data.error || '未知错误'));
                 }
@@ -750,68 +769,6 @@
             });
         }
         
-        // 加载交路票夹数据
-        function loadDriveTicketCollect() {
-            fetch(`${API_BASE_URL}/api/drive-ticket-collect`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const tbody = document.querySelector('#driveTicketCollectTable tbody');
-                    tbody.innerHTML = '';
-                    
-                    data.forEach(item => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${item.id}</td>
-                            <td>${item.collect_id}</td>
-                            <td>${item.ticket_chain || ''}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error('加载交路票夹数据失败:', error);
-                    // 显示错误信息到表格中
-                    const tbody = document.querySelector('#driveTicketCollectTable tbody');
-                    tbody.innerHTML = `<tr><td colspan="3">加载数据失败: ${error.message}</td></tr>`;
-                });
-        }
-        
-        // 在loadCrossingRoads函数中添加加载交路票夹数据的调用
-        function loadCrossingRoads() {
-            fetch(`${API_BASE_URL}/api/drive-tickets`)
-                .then(response => response.json())
-                .then(data => {
-                    const tbody = document.querySelector('#driveTicketsTable tbody');
-                    tbody.innerHTML = '';
-                    
-                    data.forEach(item => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${item.id}</td>
-                            <td>${item.ticket_id}</td>
-                            <td>${item.train_name || ''}</td>
-                            <td>${item.start_station || ''}</td>
-                            <td>${item.end_station || ''}</td>
-                            <td>${item.is_sold ? '是' : '否'}</td>
-                            <td>${item.pickup_time || ''}</td>
-                            <td>${item.dropoff_time || ''}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error('加载交路票数据失败:', error);
-                });
-            
-            // 加载交路票夹数据
-            loadDriveTicketCollect();
-        }
-        
         // 生成和更新便乘票记录
         function generateRideTickets() {
             // 禁用按钮防止重复点击
@@ -844,10 +801,46 @@
             });
         }
         
+        // 加载交路票夹数据
+        function loadDriveTicketCollect() {
+            fetch(`${API_BASE_URL}/api/drive-ticket-collect`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tbody = document.querySelector('#driveTicketCollectTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.collect_id}</td>
+                            <td>${item.ticket_chain || ''}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('加载交路票夹数据失败:', error);
+                    // 显示错误信息到表格中
+                    const tbody = document.querySelector('#driveTicketCollectTable tbody');
+                    tbody.innerHTML = `<tr><td colspan="3">加载数据失败: ${error.message}</td></tr>`;
+                });
+        }
+        
         // 加载便乘票数据
         function loadRideTickets() {
             fetch(`${API_BASE_URL}/api/ride-tickets`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     const tbody = document.querySelector('#rideTicketsTable tbody');
                     tbody.innerHTML = '';
@@ -856,7 +849,7 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${item.id}</td>
-                            <td>${item.ride_id}</td>
+                            <td>${item.ride_id || ''}</td>
                             <td>${item.train_name || ''}</td>
                             <td>${item.start_station || ''}</td>
                             <td>${item.end_station || ''}</td>
@@ -868,41 +861,10 @@
                 })
                 .catch(error => {
                     console.error('加载便乘票数据失败:', error);
+                    // 显示错误信息到表格中
+                    const tbody = document.querySelector('#rideTicketsTable tbody');
+                    tbody.innerHTML = `<tr><td colspan="7">加载数据失败: ${error.message}</td></tr>`;
                 });
-        }
-        
-        // 在loadCrossingRoads函数中添加加载便乘票数据的调用
-        function loadCrossingRoads() {
-            fetch(`${API_BASE_URL}/api/drive-tickets`)
-                .then(response => response.json())
-                .then(data => {
-                    const tbody = document.querySelector('#driveTicketsTable tbody');
-                    tbody.innerHTML = '';
-                    
-                    data.forEach(item => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${item.id}</td>
-                            <td>${item.ticket_id}</td>
-                            <td>${item.train_name || ''}</td>
-                            <td>${item.start_station || ''}</td>
-                            <td>${item.end_station || ''}</td>
-                            <td>${item.is_sold ? '是' : '否'}</td>
-                            <td>${item.pickup_time || ''}</td>
-                            <td>${item.dropoff_time || ''}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error('加载交路票数据失败:', error);
-                });
-            
-            // 加载交路票夹数据
-            loadDriveTicketCollect();
-            
-            // 加载便乘票数据
-            loadRideTickets();
         }
     </script>
 </body>

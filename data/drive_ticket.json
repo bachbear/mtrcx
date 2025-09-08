@@ -4,9 +4,9 @@
     "ticket_id": 1,
     "train_name": "G00101",
     "start_station": "王府井站",
-    "end_station": "五道口站",
+    "end_station": "西直门站",
     "pickup_time": "06:00:00",
-    "dropoff_time": "06:45:00",
+    "dropoff_time": "06:15:00",
     "is_sold": true
   },
   {
@@ -14,18 +14,18 @@
     "ticket_id": 2,
     "train_name": "G00201",
     "start_station": "王府井站",
-    "end_station": "五道口站",
+    "end_station": "西直门站",
     "pickup_time": "06:10:00",
-    "dropoff_time": "07:04:00",
+    "dropoff_time": "06:28:00",
     "is_sold": true
   },
   {
     "id": 3,
     "ticket_id": 3,
     "train_name": "G00101",
-    "start_station": "五道口站",
+    "start_station": "西直门站",
     "end_station": "宣武门站",
-    "pickup_time": "06:45:00",
+    "pickup_time": "06:15:00",
     "dropoff_time": "07:10:00",
     "is_sold": true
   },
@@ -33,9 +33,9 @@
     "id": 4,
     "ticket_id": 4,
     "train_name": "G00201",
-    "start_station": "五道口站",
+    "start_station": "西直门站",
     "end_station": "宣武门站",
-    "pickup_time": "07:04:00",
+    "pickup_time": "06:28:00",
     "dropoff_time": "07:34:00",
     "is_sold": true
   },
@@ -84,9 +84,9 @@
     "ticket_id": 9,
     "train_name": "G00102",
     "start_station": "宣武门站",
-    "end_station": "五道口站",
+    "end_station": "西直门站",
     "pickup_time": "08:25:00",
-    "dropoff_time": "08:50:00",
+    "dropoff_time": "09:20:00",
     "is_sold": true
   },
   {
@@ -94,18 +94,18 @@
     "ticket_id": 10,
     "train_name": "G00202",
     "start_station": "宣武门站",
-    "end_station": "五道口站",
+    "end_station": "西直门站",
     "pickup_time": "08:41:00",
-    "dropoff_time": "09:11:00",
+    "dropoff_time": "09:47:00",
     "is_sold": true
   },
   {
     "id": 11,
     "ticket_id": 11,
     "train_name": "G00102",
-    "start_station": "五道口站",
+    "start_station": "西直门站",
     "end_station": "王府井站",
-    "pickup_time": "08:50:00",
+    "pickup_time": "09:20:00",
     "dropoff_time": "09:35:00",
     "is_sold": true
   },
@@ -113,9 +113,9 @@
     "id": 12,
     "ticket_id": 12,
     "train_name": "G00202",
-    "start_station": "五道口站",
+    "start_station": "西直门站",
     "end_station": "王府井站",
-    "pickup_time": "09:11:00",
+    "pickup_time": "09:47:00",
     "dropoff_time": "10:05:00",
     "is_sold": true
   },
@@ -124,9 +124,9 @@
     "ticket_id": 13,
     "train_name": "G00103",
     "start_station": "王府井站",
-    "end_station": "五道口站",
+    "end_station": "西直门站",
     "pickup_time": "10:00:00",
-    "dropoff_time": "11:12:00",
+    "dropoff_time": "10:24:00",
     "is_sold": true
   },
   {
@@ -134,18 +134,18 @@
     "ticket_id": 14,
     "train_name": "G00203",
     "start_station": "王府井站",
-    "end_station": "五道口站",
+    "end_station": "西直门站",
     "pickup_time": "10:10:00",
-    "dropoff_time": "11:40:00",
+    "dropoff_time": "10:40:00",
     "is_sold": true
   },
   {
     "id": 15,
     "ticket_id": 15,
     "train_name": "G00103",
-    "start_station": "五道口站",
+    "start_station": "西直门站",
     "end_station": "宣武门站",
-    "pickup_time": "11:12:00",
+    "pickup_time": "10:24:00",
     "dropoff_time": "11:52:00",
     "is_sold": true
   },
@@ -153,9 +153,9 @@
     "id": 16,
     "ticket_id": 16,
     "train_name": "G00203",
-    "start_station": "五道口站",
+    "start_station": "西直门站",
     "end_station": "宣武门站",
-    "pickup_time": "11:40:00",
+    "pickup_time": "10:40:00",
     "dropoff_time": "12:30:00",
     "is_sold": true
   },
@@ -204,9 +204,9 @@
     "ticket_id": 21,
     "train_name": "G00104",
     "start_station": "宣武门站",
-    "end_station": "五道口站",
+    "end_station": "西直门站",
     "pickup_time": "13:50:00",
-    "dropoff_time": "14:40:00",
+    "dropoff_time": "15:40:00",
     "is_sold": true
   },
   {
@@ -214,18 +214,18 @@
     "ticket_id": 22,
     "train_name": "G00301",
     "start_station": "宣武门站",
-    "end_station": "五道口站",
+    "end_station": "西直门站",
     "pickup_time": "14:20:00",
-    "dropoff_time": "15:25:00",
+    "dropoff_time": "16:43:00",
     "is_sold": true
   },
   {
     "id": 23,
     "ticket_id": 23,
     "train_name": "G00104",
-    "start_station": "五道口站",
+    "start_station": "西直门站",
     "end_station": "王府井站",
-    "pickup_time": "14:40:00",
+    "pickup_time": "15:40:00",
     "dropoff_time": "16:10:00",
     "is_sold": true
   },
@@ -233,9 +233,9 @@
     "id": 24,
     "ticket_id": 24,
     "train_name": "G00301",
-    "start_station": "五道口站",
+    "start_station": "西直门站",
     "end_station": "王府井站",
-    "pickup_time": "15:25:00",
+    "pickup_time": "16:43:00",
     "dropoff_time": "17:22:00",
     "is_sold": true
   }

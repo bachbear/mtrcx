@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3337;
+const PORT = process.env.PORT || 3333;
 
 // 中间件
 app.use(express.json());
@@ -45,72 +45,6 @@ app.put('/api/crossing-roads', async (req, res) => {
   } catch (error) {
     console.error('保存交路数据时发生错误:', error);
     res.status(500).json({ error: '无法保存交路数据', details: error.message });
-  }
-});
-
-// API路由 - 获取所有线路信息
-app.get('/api/lines', async (req, res) => {
-  try {
-    const data = await fs.readFile(path.join(__dirname, '../data/cw_line.json'), 'utf8');
-    const lines = JSON.parse(data);
-    res.json(lines);
-  } catch (error) {
-    res.status(500).json({ error: '无法读取线路数据' });
-  }
-});
-
-// API路由 - 获取所有列车时刻表信息
-app.get('/api/train-schedules', async (req, res) => {
-  try {
-    const data = await fs.readFile(path.join(__dirname, '../data/cw_train_schedule.json'), 'utf8');
-    const trainSchedules = JSON.parse(data);
-    res.json(trainSchedules);
-  } catch (error) {
-    res.status(500).json({ error: '无法读取列车时刻表数据' });
-  }
-});
-
-// API路由 - 获取所有列车时刻表明细信息
-app.get('/api/train-schedule-details', async (req, res) => {
-  try {
-    const data = await fs.readFile(path.join(__dirname, '../data/cw_train_schedule_detail.json'), 'utf8');
-    const trainScheduleDetails = JSON.parse(data);
-    res.json(trainScheduleDetails);
-  } catch (error) {
-    res.status(500).json({ error: '无法读取列车时刻表明细数据' });
-  }
-});
-
-// API路由 - 获取所有座位类型信息
-app.get('/api/seat-types', async (req, res) => {
-  try {
-    const data = await fs.readFile(path.join(__dirname, '../data/cw_seat_type.json'), 'utf8');
-    const seatTypes = JSON.parse(data);
-    res.json(seatTypes);
-  } catch (error) {
-    res.status(500).json({ error: '无法读取座位类型数据' });
-  }
-});
-
-// API路由 - 获取所有车站信息
-app.get('/api/stations', async (req, res) => {
-  try {
-    const data = await fs.readFile(path.join(__dirname, '../data/cw_station.json'), 'utf8');
-    const stations = JSON.parse(data);
-    res.json(stations);
-  } catch (error) {
-    res.status(500).json({ error: '无法读取车站数据' });
-  }
-});
-
-// API路由 - 获取所有逻辑车站信息
-app.get('/api/logic-stations', async (req, res) => {
-  try {
-    const data = await fs.readFile(path.join(__dirname, '../data/cw_logic_station.json'), 'utf8');
-    const logicStations = JSON.parse(data);
-    res.json(logicStations);
-  } catch (error) {
-    res.status(500).json({ error: '无法读取逻辑车站数据' });
   }
 });
 
@@ -153,7 +87,7 @@ app.put('/api/drive-ticket-params', async (req, res) => {
     const updatedData = req.body;
     const filePath = path.join(__dirname, '../data/drive_ticket_param.json');
     
-    // 将更新后的数据写入文件，指定UTF-8编码
+    // 将更新后的数据写入文件
     await fs.writeFile(filePath, JSON.stringify(updatedData, null, 2), 'utf8');
     
     res.json({ message: '交路参数数据更新成功' });
@@ -166,8 +100,8 @@ app.put('/api/drive-ticket-params', async (req, res) => {
 // API路由 - 生成和更新交路票记录
 app.post('/api/generate-drive-tickets', async (req, res) => {
   try {
-    // 导入生成交路票的模块
-    const { generateDriveTickets } = require('../generate_drive_tickets');
+    // 动态导入生成交路票的模块
+    const { generateDriveTickets } = await import('../generate_drive_tickets_es.js');
     
     console.log('开始生成交路票...');
     
@@ -186,8 +120,8 @@ app.post('/api/generate-drive-tickets', async (req, res) => {
 // API路由 - 生成和更新交路票夹记录
 app.post('/api/generate-drive-ticket-collect', async (req, res) => {
   try {
-    // 导入生成交路票夹的模块
-    const { generateDriveTicketCollect } = require('../generate_drive_ticket_collect');
+    // 动态导入生成交路票夹的模块
+    const { generateDriveTicketCollect } = await import('../generate_drive_ticket_collect_updated.js');
     
     console.log('开始生成交路票夹...');
     
@@ -203,6 +137,92 @@ app.post('/api/generate-drive-ticket-collect', async (req, res) => {
   }
 });
 
+// API路由 - 生成和更新便乘票记录
+app.post('/api/generate-ride-tickets', async (req, res) => {
+  try {
+    // 动态导入生成便乘票的模块 - 使用增强版本
+    const { runEnhancedAlgorithm } = await import('../generate_ride_tickets_enhanced.js');
+    
+    console.log('开始生成便乘票...');
+    
+    // 调用生成便乘票的函数
+    const result = await runEnhancedAlgorithm();
+    
+    console.log('便乘票生成完成，结果:', result ? result.length : 0, '条记录');
+    
+    res.status(200).json({ message: '便乘票记录生成和更新成功', count: result ? result.length : 0 });
+  } catch (error) {
+    console.error('生成便乘票记录时发生错误:', error);
+    res.status(500).json({ error: '生成便乘票记录时发生错误', details: error.message });
+  }
+});
+
+// API路由 - 获取所有线路信息
+app.get('/api/lines', async (req, res) => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, '../data/cw_line.json'), 'utf8');
+    const lines = JSON.parse(data);
+    res.json(lines);
+  } catch (error) {
+    res.status(500).json({ error: '无法读取线路数据' });
+  }
+});
+
+// API路由 - 获取所有车站信息
+app.get('/api/stations', async (req, res) => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, '../data/cw_station.json'), 'utf8');
+    const stations = JSON.parse(data);
+    res.json(stations);
+  } catch (error) {
+    res.status(500).json({ error: '无法读取车站数据' });
+  }
+});
+
+// API路由 - 获取所有座位类型信息
+app.get('/api/seat-types', async (req, res) => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, '../data/cw_seat_type.json'), 'utf8');
+    const seatTypes = JSON.parse(data);
+    res.json(seatTypes);
+  } catch (error) {
+    res.status(500).json({ error: '无法读取座位类型数据' });
+  }
+});
+
+// API路由 - 获取所有逻辑车站信息
+app.get('/api/logic-stations', async (req, res) => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, '../data/cw_logic_station.json'), 'utf8');
+    const logicStations = JSON.parse(data);
+    res.json(logicStations);
+  } catch (error) {
+    res.status(500).json({ error: '无法读取逻辑车站数据' });
+  }
+});
+
+// API路由 - 获取所有列车时刻表信息
+app.get('/api/train-schedules', async (req, res) => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, '../data/cw_train_schedule.json'), 'utf8');
+    const trainSchedules = JSON.parse(data);
+    res.json(trainSchedules);
+  } catch (error) {
+    res.status(500).json({ error: '无法读取列车时刻表数据' });
+  }
+});
+
+// API路由 - 获取所有列车时刻表明细信息
+app.get('/api/train-schedule-details', async (req, res) => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, '../data/cw_train_schedule_detail.json'), 'utf8');
+    const trainScheduleDetails = JSON.parse(data);
+    res.json(trainScheduleDetails);
+  } catch (error) {
+    res.status(500).json({ error: '无法读取列车时刻表明细数据' });
+  }
+});
+
 // API路由 - 获取所有便乘票信息
 app.get('/api/ride-tickets', async (req, res) => {
   try {
@@ -211,26 +231,6 @@ app.get('/api/ride-tickets', async (req, res) => {
     res.json(rideTickets);
   } catch (error) {
     res.status(500).json({ error: '无法读取便乘票数据' });
-  }
-});
-
-// API路由 - 生成和更新便乘票记录
-app.post('/api/generate-ride-tickets', async (req, res) => {
-  try {
-    // 导入生成便乘票的模块
-    const { generateRideTickets } = require('../generate_ride_tickets');
-    
-    console.log('开始生成便乘票...');
-    
-    // 调用生成便乘票的函数
-    const result = await generateRideTickets();
-    
-    console.log('便乘票生成完成，结果:', result ? result.length : 0, '条记录');
-    
-    res.status(200).json({ message: '便乘票记录生成和更新成功', count: result ? result.length : 0 });
-  } catch (error) {
-    console.error('生成便乘票记录时发生错误:', error);
-    res.status(500).json({ error: '生成便乘票记录时发生错误', details: error.message });
   }
 });
 

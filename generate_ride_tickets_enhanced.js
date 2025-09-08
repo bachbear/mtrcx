@@ -271,4 +271,10 @@ async function runEnhancedAlgorithm() {
   }
 }
 
-runEnhancedAlgorithm();
+// 导出函数供其他模块使用
+export { runEnhancedAlgorithm };
+
+// 如果直接运行此脚本，则执行便乘票生成
+if (import.meta.url === `file://${import.meta.filename}`) {
+  runEnhancedAlgorithm();
+}

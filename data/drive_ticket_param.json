@@ -2,7 +2,7 @@
   {
     "id": 1,
     "param_name": "最大开车时间",
-    "param_value": "06:00:00",
+    "param_value": "01:00:00",
     "param_type": "1",
     "param_desc": "最大开车时间参数",
     "is_checked": true
@@ -66,7 +66,7 @@
   {
     "id": 8,
     "param_name": "变更车次间隔时间",
-    "param_value": "00:10:00",
+    "param_value": "00:40:00",
     "param_type": 1,
     "param_desc": "变更车次间隔时间参数(默认30分钟)",
     "is_checked": true
