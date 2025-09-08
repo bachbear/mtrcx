@@ -1,6 +1,10 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs').promises;
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { promises as fs } from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3337;
@@ -196,6 +200,37 @@ app.post('/api/generate-drive-ticket-collect', async (req, res) => {
   } catch (error) {
     console.error('生成交路票夹记录时发生错误:', error);
     res.status(500).json({ error: '生成交路票夹记录时发生错误', details: error.message });
+  }
+});
+
+// API路由 - 获取所有便乘票信息
+app.get('/api/ride-tickets', async (req, res) => {
+  try {
+    const data = await fs.readFile(path.join(__dirname, '../data/drive_ride_ticket.json'), 'utf8');
+    const rideTickets = JSON.parse(data);
+    res.json(rideTickets);
+  } catch (error) {
+    res.status(500).json({ error: '无法读取便乘票数据' });
+  }
+});
+
+// API路由 - 生成和更新便乘票记录
+app.post('/api/generate-ride-tickets', async (req, res) => {
+  try {
+    // 导入生成便乘票的模块
+    const { generateRideTickets } = require('../generate_ride_tickets');
+    
+    console.log('开始生成便乘票...');
+    
+    // 调用生成便乘票的函数
+    const result = await generateRideTickets();
+    
+    console.log('便乘票生成完成，结果:', result ? result.length : 0, '条记录');
+    
+    res.status(200).json({ message: '便乘票记录生成和更新成功', count: result ? result.length : 0 });
+  } catch (error) {
+    console.error('生成便乘票记录时发生错误:', error);
+    res.status(500).json({ error: '生成便乘票记录时发生错误', details: error.message });
   }
 });
 

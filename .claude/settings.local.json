@@ -40,7 +40,9 @@
       "WebSearch",
       "Bash(git checkout:*)",
       "Bash(rm:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(cp:*)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []

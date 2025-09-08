@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "station_id": 10,
+    "station_id": 4,
     "line_id": 1,
     "station_type": 1
   },
@@ -10,5 +10,41 @@
     "station_id": 15,
     "line_id": 1,
     "station_type": 1
+  },
+  {
+    "id": 3,
+    "station_id": 4,
+    "line_id": 1,
+    "station_type": 2
+  },
+  {
+    "id": 4,
+    "station_id": 15,
+    "line_id": 1,
+    "station_type": 2
+  },
+  {
+    "id": 5,
+    "station_id": 10,
+    "line_id": 1,
+    "station_type": 3
+  },
+  {
+    "id": 6,
+    "station_id": 15,
+    "line_id": 1,
+    "station_type": 3
+  },
+  {
+    "id": 7,
+    "station_id": 10,
+    "line_id": 1,
+    "station_type": 4
+  },
+  {
+    "id": 8,
+    "station_id": 15,
+    "line_id": 1,
+    "station_type": 4
   }
 ]

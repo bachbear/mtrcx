@@ -12,7 +12,6 @@ async function generateDriveTickets() {
     const trainScheduleDetails = JSON.parse(await fs.readFile(path.join(rootDir, 'data/cw_train_schedule_detail.json'), 'utf8'));
     const logicStations = JSON.parse(await fs.readFile(path.join(rootDir, 'data/cw_logic_station.json'), 'utf8'));
     const stations = JSON.parse(await fs.readFile(path.join(rootDir, 'data/cw_station.json'), 'utf8'));
-    const seatTypes = JSON.parse(await fs.readFile(path.join(rootDir, 'data/cw_seat_type.json'), 'utf8'));
 
     // 检查逻辑车站数据
     if (logicStations.length === 0) {
@@ -20,10 +19,6 @@ async function generateDriveTickets() {
       return [];
     }
 
-    // 检查座位类型数据
-    if (seatTypes.length === 0) {
-      console.warn('警告: 未找到座位类型数据，将使用默认值');
-    }
 
     // 按发车时间递增排序所有车次
     const sortedTrainSchedules = trainSchedules.sort((a, b) => 
@@ -89,16 +84,11 @@ async function generateDriveTickets() {
 
       // 如果找到了退车站点，生成交路票记录
       if (endStation && currentStartStation) {
-        // 座位类型设置为司机座位
-        const driverSeatType = seatTypes.find(st => st.seat_type_id === 1);
-        const seatTypeName = driverSeatType ? driverSeatType.seat_type_name : "驾驶位";
-
         // 生成A记录（2.2.2步骤）- 不包含时间信息
         const ticketA = {
           train_name: trainScheduleName,
           start_station: currentStartStation,
-          end_station: endStation,
-          seat_type: seatTypeName
+          end_station: endStation
         };
 
         driveTickets.push(ticketA);
@@ -146,8 +136,7 @@ async function generateDriveTickets() {
               const newTicket = {
                 train_name: trainScheduleName,
                 start_station: inputStation,
-                end_station: newEndStation,
-                seat_type: seatTypeName
+                end_station: newEndStation
               };
 
               driveTickets.push(newTicket);

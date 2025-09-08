@@ -1,15 +1,17 @@
-const fs = require('fs').promises;
-const path = require('path');
+import { promises as fs } from 'fs';
+import { resolve, join } from 'path';
 
 // 交路票夹生成主函数
 async function generateDriveTicketCollect() {
   try {
-    const rootDir = path.resolve(__dirname);
-    const dataDir = path.join(rootDir, 'data');
+    const rootDir = resolve('.');
+    const dataDir = join(rootDir, 'data');
 
     // 读取所有必要的数据文件
-    let driveTickets = JSON.parse(await fs.readFile(path.join(dataDir, 'drive_ticket.json'), 'utf8'));
-    const params = JSON.parse(await fs.readFile(path.join(dataDir, 'drive_ticket_param.json'), 'utf8'));
+    let driveTickets = JSON.parse(await fs.readFile(join(dataDir, 'drive_ticket.json'), 'utf8'));
+    const params = JSON.parse(await fs.readFile(join(dataDir, 'drive_ticket_param.json'), 'utf8'));
+
+    console.log(`开始生成交路票夹，共有 ${driveTickets.length} 条交路票`);
 
     // 3.2.1 把交路票数据表中的所有记录的is_sold字段设置为false
     driveTickets = driveTickets.map(ticket => ({
@@ -96,12 +98,6 @@ async function generateDriveTicketCollect() {
         // 只从未售出的票中寻找下一个票
         const availableUnsoldTickets = unsoldTickets.filter(ticket => !ticket.is_sold);
         nextTicket = findNextTicket(availableUnsoldTickets, currentState, changeInterval);
-          // 添加调试信息
-          if (nextTicket) {
-            console.log(`找到下一张票: ${nextTicket.ticket_id}, 当前状态:`, currentState);
-          } else {
-            console.log(`未找到下一张票，当前状态:`, currentState);
-          }
         
         if (nextTicket) {
           // 3.2.4 调用"交路截止逻辑"，把3.2.2产生的交路票序号链和3.2.3产生的交路票作为输入参数，判断是否需要继续挑选下一张交路票
@@ -160,6 +156,8 @@ async function generateDriveTicketCollect() {
       collectId++;
     }
 
+    console.log(`生成了 ${collectList.length} 个交路票夹`);
+
     // 3.2.4 更新交路票的is_sold状态
     const updatedDriveTickets = driveTickets.map(ticket => {
       // 检查该票是否在任何collect中
@@ -173,33 +171,49 @@ async function generateDriveTicketCollect() {
     });
 
     // 3.2.6 按交路票夹记录序号，升序遍历所有交路票夹记录，取出当前交路票夹记录中的交路票序号链，作为输入参数传给"出勤便乘票补全逻辑"
+    console.log('开始出勤便乘票补全...');
     for (let i = 0; i < collectList.length; i++) {
       const collect = collectList[i];
-      const result = completeAttendanceRideTickets(collect.ticket_chain, driveTickets, dataDir);
+      const result = await completeAttendanceRideTickets(collect.ticket_chain, driveTickets, dataDir);
       collectList[i].ticket_chain = result;
+      if (result !== collect.ticket_chain) {
+        console.log(`交路票夹 ${i+1} 出勤便乘票补全: ${collect.ticket_chain} -> ${result}`);
+      }
     }
 
     // 3.2.7 按交路票夹记录序号，升序遍历所有交路票夹记录，取出当前交路票夹记录中的交路票序号链，作为输入参数传给"退勤便乘票补全逻辑"
+    console.log('开始退勤便乘票补全...');
     for (let i = 0; i < collectList.length; i++) {
       const collect = collectList[i];
-      const result = completeOffDutyRideTickets(collect.ticket_chain, driveTickets, dataDir);
+      const result = await completeOffDutyRideTickets(collect.ticket_chain, driveTickets, dataDir);
       collectList[i].ticket_chain = result;
+      if (result !== collect.ticket_chain) {
+        console.log(`交路票夹 ${i+1} 退勤便乘票补全: ${collect.ticket_chain} -> ${result}`);
+      }
     }
 
     // 保存结果到文件
     await fs.writeFile(
-      path.join(dataDir, 'drive_ticket_collect.json'),
+      join(dataDir, 'drive_ticket_collect.json'),
       JSON.stringify(collectList, null, 2),
       'utf8'
     );
 
     await fs.writeFile(
-      path.join(dataDir, 'drive_ticket.json'),
+      join(dataDir, 'drive_ticket.json'),
       JSON.stringify(updatedDriveTickets, null, 2),
       'utf8'
     );
 
     console.log(`成功生成 ${collectList.length} 个交路票夹，共处理 ${updatedDriveTickets.length} 条交路票`);
+    console.log('结果已保存到 data/drive_ticket_collect.json 和 data/drive_ticket.json');
+    
+    // 显示前几个交路票夹作为示例
+    console.log('\n生成的交路票夹示例:');
+    collectList.slice(0, 5).forEach((collect, index) => {
+      console.log(`${index+1}. ${collect.ticket_chain}`);
+    });
+    
     return collectList;
   } catch (error) {
     console.error('生成交路票夹时发生错误:', error);
@@ -316,18 +330,13 @@ function shouldEndCollect(currentCollect, nextTicket, params) {
   return false;
 }
 
-// 如果直接运行此脚本，则执行生成交路票夹的函数
-if (require.main === module) {
-  generateDriveTicketCollect();
-}
-
 // 3.7 出勤便乘票补全逻辑
 async function completeAttendanceRideTickets(ticketChain, driveTickets, dataDir) {
   try {
     // 读取便乘票数据
     let rideTickets = [];
     try {
-      rideTickets = JSON.parse(await fs.readFile(path.join(dataDir, 'drive_ride_ticket.json'), 'utf8'));
+      rideTickets = JSON.parse(await fs.readFile(join(dataDir, 'drive_ride_ticket.json'), 'utf8'));
     } catch (error) {
       console.warn('警告: 未找到便乘票数据，将跳过出勤便乘票补全');
       return ticketChain;
@@ -349,8 +358,8 @@ async function completeAttendanceRideTickets(ticketChain, driveTickets, dataDir)
     const startStation = firstTicket.start_station;
     
     // 查询逻辑车站表，如果上车站点是出勤站点，则不做处理，直接返回输入的字符串
-    const logicStations = JSON.parse(await fs.readFile(path.join(dataDir, 'cw_logic_station.json'), 'utf8'));
-    const stations = JSON.parse(await fs.readFile(path.join(dataDir, 'cw_station.json'), 'utf8'));
+    const logicStations = JSON.parse(await fs.readFile(join(dataDir, 'cw_logic_station.json'), 'utf8'));
+    const stations = JSON.parse(await fs.readFile(join(dataDir, 'cw_station.json'), 'utf8'));
     
     // 找到上车站点的ID
     const station = stations.find(s => s.station_name === startStation);
@@ -368,8 +377,8 @@ async function completeAttendanceRideTickets(ticketChain, driveTickets, dataDir)
     }
     
     // 如果上车站点不是出勤站点，则根据车次名称和下车站点名称，查询列车时刻表明细表，获得到达时间
-    const trainSchedules = JSON.parse(await fs.readFile(path.join(dataDir, 'cw_train_schedule.json'), 'utf8'));
-    const trainScheduleDetails = JSON.parse(await fs.readFile(path.join(dataDir, 'cw_train_schedule_detail.json'), 'utf8'));
+    const trainSchedules = JSON.parse(await fs.readFile(join(dataDir, 'cw_train_schedule.json'), 'utf8'));
+    const trainScheduleDetails = JSON.parse(await fs.readFile(join(dataDir, 'cw_train_schedule_detail.json'), 'utf8'));
     
     // 找到对应的车次时刻表
     const trainSchedule = trainSchedules.find(ts => ts.train_name === trainName);
@@ -439,7 +448,7 @@ async function completeOffDutyRideTickets(ticketChain, driveTickets, dataDir) {
     // 读取便乘票数据
     let rideTickets = [];
     try {
-      rideTickets = JSON.parse(await fs.readFile(path.join(dataDir, 'drive_ride_ticket.json'), 'utf8'));
+      rideTickets = JSON.parse(await fs.readFile(join(dataDir, 'drive_ride_ticket.json'), 'utf8'));
     } catch (error) {
       console.warn('警告: 未找到便乘票数据，将跳过退勤便乘票补全');
       return ticketChain;
@@ -461,8 +470,8 @@ async function completeOffDutyRideTickets(ticketChain, driveTickets, dataDir) {
     const endStation = lastTicket.end_station;
     
     // 查询逻辑车站表，如果下车站点是退勤站点，则不做处理，直接返回输入的字符串
-    const logicStations = JSON.parse(await fs.readFile(path.join(dataDir, 'cw_logic_station.json'), 'utf8'));
-    const stations = JSON.parse(await fs.readFile(path.join(dataDir, 'cw_station.json'), 'utf8'));
+    const logicStations = JSON.parse(await fs.readFile(join(dataDir, 'cw_logic_station.json'), 'utf8'));
+    const stations = JSON.parse(await fs.readFile(join(dataDir, 'cw_station.json'), 'utf8'));
     
     // 找到下车站点的ID
     const station = stations.find(s => s.station_name === endStation);
@@ -480,8 +489,8 @@ async function completeOffDutyRideTickets(ticketChain, driveTickets, dataDir) {
     }
     
     // 如果下车站点不是退勤站点，则根据车次名称和下车站点名称，查询列车时刻表明细表，获得到达时间
-    const trainSchedules = JSON.parse(await fs.readFile(path.join(dataDir, 'cw_train_schedule.json'), 'utf8'));
-    const trainScheduleDetails = JSON.parse(await fs.readFile(path.join(dataDir, 'cw_train_schedule_detail.json'), 'utf8'));
+    const trainSchedules = JSON.parse(await fs.readFile(join(dataDir, 'cw_train_schedule.json'), 'utf8'));
+    const trainScheduleDetails = JSON.parse(await fs.readFile(join(dataDir, 'cw_train_schedule_detail.json'), 'utf8'));
     
     // 找到对应的车次时刻表
     const trainSchedule = trainSchedules.find(ts => ts.train_name === trainName);
@@ -545,7 +554,14 @@ async function completeOffDutyRideTickets(ticketChain, driveTickets, dataDir) {
   }
 }
 
+// 如果直接运行此脚本，则执行生成交路票夹的函数
+if (import.meta.url === `file://${resolve(import.meta.url)}`) {
+  generateDriveTicketCollect().then(() => {
+    console.log('交路票夹生成完成');
+  }).catch(err => {
+    console.error('交路票夹生成失败:', err);
+  });
+}
+
 // 导出生成交路票夹的函数
-module.exports = {
-  generateDriveTicketCollect
-};
+export { generateDriveTicketCollect };
