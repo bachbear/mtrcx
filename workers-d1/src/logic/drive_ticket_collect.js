@@ -210,19 +210,34 @@ function shouldEndCollect(currentCollect, nextTicket, params) {
 }
 
 function completeAttendanceRideTickets(ticketChain, driveTickets, rideTickets, logicStations, stations, trainSchedules, trainScheduleDetails) {
-  const ticketIds = ticketChain.split('->').map(id => parseInt(id));
+  // 3.7.1 输入的参数字符串用"->"作为分隔符，把字符串分割成多个子字符串，每个子字符串表示一个交路票序号
+  // 但如果字符串包含"=>"，说明已经有便乘票补全结果，我们需要只解析最后一部分
+  let effectiveChain = ticketChain;
+  if (ticketChain.includes('=>')) {
+    // 取出最后一部分作为实际的交路票序号链
+    effectiveChain = ticketChain.split('=>').pop();
+  }
+
+  const ticketIds = effectiveChain.split('->').map(id => parseInt(id));
+
+  // 3.7.2 取出第一个子字符串，作为当前交路票序号
   const firstTicketId = ticketIds[0];
   const firstTicket = driveTickets.find(ticket => ticket.ticket_id === firstTicketId);
   if (!firstTicket) return ticketChain;
 
+  // 3.7.3 从交路票数据表中，根据当前交路票序号，取出当前交路票的车次名称和上车站点名称
   const trainName = firstTicket.train_name;
   const startStation = firstTicket.start_station;
   const station = stations.find(s => s.station_name === startStation);
   if (!station) return ticketChain;
 
+  // 查询逻辑车站表，如果上车站点是出勤站点，则构建结果字符串为"[本地出勤]"
   const isAttendanceStation = logicStations.some(ls => ls.station_id === station.station_id && ls.station_type === 1);
-  if (isAttendanceStation) return ticketChain;
+  if (isAttendanceStation) {
+    return `[本地出勤]=>${ticketChain}`;
+  }
 
+  // 如果上车站点不是出勤站点，则根据车次名称和下车站点名称，查询列车时刻表明细表，获得到达时间
   const trainSchedule = trainSchedules.find(ts => ts.train_name === trainName);
   if (!trainSchedule) return ticketChain;
 
@@ -237,34 +252,69 @@ function completeAttendanceRideTickets(ticketChain, driveTickets, rideTickets, l
   if (!startStationDetail) return ticketChain;
 
   const arriveTime = startStationDetail.arrive_time;
-  const validRideTickets = rideTickets.filter(rt => rt.end_station === startStation && rt.dropoff_time <= arriveTime);
-  if (validRideTickets.length === 0) return ticketChain;
 
-  validRideTickets.sort((a, b) => (timeToMinutes(arriveTime) - timeToMinutes(a.dropoff_time)) - (timeToMinutes(arriveTime) - timeToMinutes(b.dropoff_time)));
+  // 查询便乘票表，获得下车站点为该下车站点，下车站到站时间早于该到达时间，但是差距最小的记录
+  const validRideTickets = rideTickets.filter(rt => rt.end_station === startStation && rt.dropoff_time <= arriveTime);
+
+  if (validRideTickets.length === 0) {
+    // 如果查询结果为0条记录，则构建结果字符串为"[自行前往]"
+    return `[自行前往]=>${ticketChain}`;
+  }
+
+  // 计算每个便乘票的时间差距（到达时间 - 便乘票到达时间）
+  const rideTicketsWithGap = validRideTickets.map(ticket => ({
+    ...ticket,
+    timeGap: timeToMinutes(arriveTime) - timeToMinutes(ticket.dropoff_time)
+  }));
+
+  // 找到最小时间差距
+  const minTimeGap = Math.min(...rideTicketsWithGap.map(t => t.timeGap));
+
+  // 只筛选时间差距最小的便乘票
+  const minimalGapTickets = rideTicketsWithGap.filter(t => t.timeGap === minTimeGap);
 
   let resultString = "";
-  if (validRideTickets.length === 1) {
-    resultString = `[出勤便]${validRideTickets[0].ride_id}`;
+  if (minimalGapTickets.length === 1) {
+    // 构建结果字符串，格式为："[出勤便]"串上便乘票序号
+    resultString = `[出勤便]${minimalGapTickets[0].ride_id}`;
   } else {
-    resultString = validRideTickets.map((t, i) => `[出勤便${i + 1}]${t.ride_id}`).join(':');
+    // 如果有多条时间差距最小的记录，则构建结果字符串格式为："[出勤便1]"串上第一条便乘票序号串上":"串上"[出勤便n]"串上第n条便乘票序号
+    resultString = minimalGapTickets.map((t, i) => `[出勤便${i + 1}]${t.ride_id}`).join(':');
   }
+
+  // 3.7.4 返回字符串，字符串的值为：结果字符串串上"=>"再串上输入的字符串
   return `${resultString}=>${ticketChain}`;
 }
 
 function completeOffDutyRideTickets(ticketChain, driveTickets, rideTickets, logicStations, stations, trainSchedules, trainScheduleDetails) {
-  const ticketIds = ticketChain.split('->').map(id => parseInt(id));
+  // 3.8.1 输入的参数字符串用"->"作为分隔符，把字符串分割成多个子字符串，每个子字符串表示一个交路票序号
+  // 但如果字符串包含"=>"，说明已经有便乘票补全结果，我们需要只解析最后一部分
+  let effectiveChain = ticketChain;
+  if (ticketChain.includes('=>')) {
+    // 取出最后一部分作为实际的交路票序号链
+    effectiveChain = ticketChain.split('=>').pop();
+  }
+
+  const ticketIds = effectiveChain.split('->').map(id => parseInt(id));
+
+  // 3.8.2 取出最后一个子字符串，作为当前交路票序号
   const lastTicketId = ticketIds[ticketIds.length - 1];
   const lastTicket = driveTickets.find(ticket => ticket.ticket_id === lastTicketId);
   if (!lastTicket) return ticketChain;
 
+  // 3.8.3 从交路票数据表中，根据当前交路票序号，取出当前交路票的车次名称和下车站点名称
   const trainName = lastTicket.train_name;
   const endStation = lastTicket.end_station;
   const station = stations.find(s => s.station_name === endStation);
   if (!station) return ticketChain;
 
+  // 查询逻辑车站表，如果下车站点是退勤站点，则构建结果字符串为"[本地退勤]"
   const isOffDutyStation = logicStations.some(ls => ls.station_id === station.station_id && ls.station_type === 2);
-  if (isOffDutyStation) return ticketChain;
+  if (isOffDutyStation) {
+    return `${ticketChain}=>[本地退勤]`;
+  }
 
+  // 如果下车站点不是退勤站点，则根据车次名称和下车站点名称，查询列车时刻表明细表，获得到达时间
   const trainSchedule = trainSchedules.find(ts => ts.train_name === trainName);
   if (!trainSchedule) return ticketChain;
 
@@ -279,16 +329,41 @@ function completeOffDutyRideTickets(ticketChain, driveTickets, rideTickets, logi
   if (!endStationDetail) return ticketChain;
 
   const arriveTime = endStationDetail.arrive_time;
-  const validRideTickets = rideTickets.filter(rt => rt.start_station === endStation && rt.pickup_time >= arriveTime);
-  if (validRideTickets.length === 0) return ticketChain;
 
-  validRideTickets.sort((a, b) => (timeToMinutes(a.pickup_time) - timeToMinutes(arriveTime)) - (timeToMinutes(b.pickup_time) - timeToMinutes(arriveTime)));
+  // 查询便乘票表，获得上车站点为该下车站点，上车站到站时间晚于该到达时间，但是差距最小的记录
+  const validRideTickets = rideTickets.filter(rt => rt.start_station === endStation && rt.pickup_time >= arriveTime);
+
+  if (validRideTickets.length === 0) {
+    // 如果查询结果为0条记录，则构建结果字符串为"[滞留当地]"
+    return `${ticketChain}=>[滞留当地]`;
+  }
+
+  // 计算每个便乘票的时间差距
+  const rideTicketsWithGap = validRideTickets.map(ticket => ({
+    ...ticket,
+    timeGap: timeToMinutes(ticket.pickup_time) - timeToMinutes(arriveTime)
+  }));
+
+  // 找到最小时间差距
+  const minTimeGap = Math.min(...rideTicketsWithGap.map(t => t.timeGap));
+
+  // 只筛选时间差距最小的便乘票
+  const minimalGapTickets = rideTicketsWithGap.filter(t => t.timeGap === minTimeGap);
 
   let resultString = "";
-  if (validRideTickets.length === 1) {
-    resultString = `[退勤便]${validRideTickets[0].ride_id}`;
+  if (minimalGapTickets.length === 1) {
+    // 构建结果字符串，格式为："[退勤便]"串上便乘票序号
+    resultString = `[退勤便]${minimalGapTickets[0].ride_id}`;
   } else {
-    resultString = validRideTickets.map((t, i) => `[退勤便${i + 1}]${t.ride_id}`).join(':');
+    // 如果有多条时间差距最小的记录，则构建结果字符串格式为："[退勤便1]"串上第一条便乘票序号串上":"串上"[退勤便n]"串上第n条便乘票序号
+    resultString = minimalGapTickets.map((t, i) => `[退勤便${i + 1}]${t.ride_id}`).join(':');
   }
-  return `${ticketChain}=>${resultString}`;
+
+  // 3.8.4 返回字符串，字符串的值为：输入的字符串串上"=>"再串上结果字符串
+  // 如果输入字符串已经包含"=>"，我们需要在最后追加
+  if (ticketChain.includes('=>')) {
+    return `${ticketChain}=>${resultString}`;
+  } else {
+    return `${ticketChain}=>${resultString}`;
+  }
 }
