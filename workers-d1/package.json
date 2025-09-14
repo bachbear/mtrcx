@@ -1,0 +1,30 @@
+{
+  "name": "workers-d1-subway-system",
+  "version": "1.0.0",
+  "description": "地铁交路管理系统 - Cloudflare Workers + D1版本",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate:local": "wrangler d1 migrations apply subway-management-db --local",
+    "migrate:remote": "wrangler d1 migrations apply subway-management-db --remote",
+    "db:create": "wrangler d1 create subway-management-db",
+    "db:info": "wrangler d1 info subway-management-db",
+    "generate-migration": "node scripts/migrate-data.js",
+    "test": "node scripts/test-api.js"
+  },
+  "keywords": [
+    "subway",
+    "route",
+    "management",
+    "cloudflare",
+    "workers",
+    "d1"
+  ],
+  "author": "Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

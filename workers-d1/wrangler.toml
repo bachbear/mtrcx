@@ -1,0 +1,15 @@
+name = "subway-system-dt"
+main = "src/index.js"
+compatibility_date = "2023-10-30"
+
+routes = [
+    { pattern = "dt.xiaov.co/*", zone_name = "xiaov.co" }
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "subway-management-db"
+database_id = "25beff53-4be2-4329-b05e-b4188c0b0bc6"
+
+[site]
+bucket = "./public"
